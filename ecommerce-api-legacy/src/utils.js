@@ -1,25 +1,23 @@
+const { hashPassword } = require("./utils/security");
+
 const config = {
-    dbUser: "admin_master",
-    dbPass: "senha_super_secreta_prod_123", 
-    paymentGatewayKey: "pk_live_1234567890abcdef",
-    smtpUser: "no-reply@fullcycle.com.br",
-    port: 3000
+  dbUser: process.env.DB_USER || "local_user",
+  dbPass: process.env.DB_PASS || "local_password",
+  paymentGatewayKey: process.env.PAYMENT_GATEWAY_KEY || "dev-gateway-key",
+  smtpUser: process.env.SMTP_USER || "no-reply@example.com",
+  port: Number(process.env.PORT || 3000),
 };
 
-let globalCache = {};
+const globalCache = {};
 let totalRevenue = 0;
 
 function logAndCache(key, data) {
-    console.log(`[LOG] Salvando no cache: ${key}`);
-    globalCache[key] = data;
+  globalCache[key] = data;
 }
 
-function badCrypto(pwd) {
-    let hash = "";
-    for(let i = 0; i < 10000; i++) {
-        hash += Buffer.from(pwd).toString('base64').substring(0, 2);
-    }
-    return hash.substring(0, 10);
+// Compatibility wrapper for legacy call sites.
+function badCrypto(password) {
+  return hashPassword(password);
 }
 
 module.exports = { config, logAndCache, badCrypto, globalCache, totalRevenue };
